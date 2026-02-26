@@ -14,13 +14,15 @@ module tt_um_example(
     input  wire       ena,
     input  wire       clk,
     input  wire       rst_n
+`ifdef USE_POWER_PINS
+    , inout wire vccd1
+    , inout wire vssd1
+`endif
 );
 
-    // Not using bidirectional pins
     assign uio_out = 8'b0;
     assign uio_oe  = 8'b0;
 
-    // Connect your LIF relay selector
     wire [1:0] relay_sel;
 
     lif_relay u_lif (
@@ -30,13 +32,8 @@ module tt_um_example(
         .relay_sel (relay_sel)
     );
 
-    // Output mapping:
-    // uo_out[1:0] = relay_sel (00=AF, 01=DF, 10=CF)
-    // uo_out[7:2] = debug (echo ui_in[5:0])
-    assign uo_out[1:0] = relay_sel;
-    assign uo_out[7:2] = ui_in[5:0];
+    assign uo_out = { ui_in[5:0], relay_sel };
 
-    // Silence unused warnings
     wire _unused = &{uio_in, ena};
 
 endmodule
