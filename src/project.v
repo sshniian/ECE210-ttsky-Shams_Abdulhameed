@@ -32,8 +32,8 @@ module tt_um_example(
         .relay_sel (relay_sel)
     );
 
-    assign uo_out = { 6'b0, relay_sel };
+    assign uo_out = {6'b0, relay_sel};
 
-    wire _unused = 1'b0;
+    wire _unused = &{uio_in, ena};
 
 endmodule
