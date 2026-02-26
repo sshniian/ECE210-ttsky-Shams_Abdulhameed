@@ -13,6 +13,18 @@ module tb;
   wire [7:0] uio_out;
   wire [7:0] uio_oe;
 
+`ifdef USE_POWER_PINS
+  // Global supplies for gate-level netlist (no DUT port hookup)
+  supply1 vccd1;
+  supply0 vssd1;
+
+  // Common SKY130 power nets (safe even if unused)
+  supply1 VPWR;
+  supply0 VGND;
+  supply1 VPB;
+  supply0 VNB;
+`endif
+
   // Instantiate DUT (TinyTapeout top module)
   tt_um_example dut (
     .ui_in(ui_in),
