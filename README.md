@@ -1,42 +1,63 @@
-![](../../workflows/gds/badge.svg) ![](../../workflows/docs/badge.svg) ![](../../workflows/test/badge.svg) ![](../../workflows/fpga/badge.svg)
+# Sequential Leaky Integrate-and-Fire Relay Selector
 
-# Tiny Tapeout Verilog Project Template
+## Project Overview
 
-- [Read the documentation for project](docs/info.md)
+This project implements a brain-inspired hardware decision module that selects the optimal relay strategy (AF, DF, or CF) based on power allocation (alpha).
 
-## What is Tiny Tapeout?
+The design is inspired by Leaky Integrate-and-Fire (LIF) neurons combined with a Winner-Take-All (WTA) selection mechanism. Instead of using complex arithmetic or continuous optimization, the circuit performs lightweight fixed-point accumulation and threshold comparison to make a low-power decision.
 
-Tiny Tapeout is an educational project that aims to make it easier and cheaper than ever to get your digital and analog designs manufactured on a real chip.
+## Problem Statement
 
-To learn more and get started, visit https://tinytapeout.com.
+In cooperative wireless communication systems, multiple relay strategies exist:
+- Amplify-and-Forward (AF)
+- Decode-and-Forward (DF)
+- Compress-and-Forward (CF)
 
-## Set up your Verilog project
+Based on simulation results from prior software analysis, different power allocation values favor different relay strategies. This project translates that decision logic into a hardware-efficient neuromorphic circuit.
 
-1. Add your Verilog files to the `src` folder.
-2. Edit the [info.yaml](info.yaml) and update information about your project, paying special attention to the `source_files` and `top_module` properties. If you are upgrading an existing Tiny Tapeout project, check out our [online info.yaml migration tool](https://tinytapeout.github.io/tt-yaml-upgrade-tool/).
-3. Edit [docs/info.md](docs/info.md) and add a description of your project.
-4. Adapt the testbench to your design. See [test/README.md](test/README.md) for more information.
+## System Architecture
 
-The GitHub action will automatically build the ASIC files using [LibreLane](https://www.zerotoasiccourse.com/terminology/librelane/).
+Input:
+- 8-bit alpha value representing power allocation
 
-## Enable GitHub actions to build the results page
+Processing:
+- Three LIF neuron blocks (AF, DF, CF)
+- Each neuron integrates weighted alpha
+- Leak mechanism prevents unlimited growth
+- Threshold detection determines activation
 
-- [Enabling GitHub Pages](https://tinytapeout.com/faq/#my-github-action-is-failing-on-the-pages-part)
+Decision:
+- Winner-Take-All logic selects the first neuron crossing threshold
 
-## Resources
+Output:
+- 2-bit relay_sel signal
+    - 00 = AF
+    - 01 = DF
+    - 10 = CF
 
-- [FAQ](https://tinytapeout.com/faq/)
-- [Digital design lessons](https://tinytapeout.com/digital_design/)
-- [Learn how semiconductors work](https://tinytapeout.com/siliwiz/)
-- [Join the community](https://tinytapeout.com/discord)
-- [Build your design locally](https://www.tinytapeout.com/guides/local-hardening/)
+## Design Motivation
 
-## What next?
+The objective is to demonstrate how brain-inspired circuits can perform decision-making using:
+- Fixed-point arithmetic
+- Minimal logic resources
+- Threshold-based early decision
+- No multipliers or floating-point operations
 
-- [Submit your design to the next shuttle](https://app.tinytapeout.com/).
-- Edit [this README](README.md) and explain your design, how it works, and how to test it.
-- Share your project on your social network of choice:
-  - LinkedIn [#tinytapeout](https://www.linkedin.com/search/results/content/?keywords=%23tinytapeout) [@TinyTapeout](https://www.linkedin.com/company/100708654/)
-  - Mastodon [#tinytapeout](https://chaos.social/tags/tinytapeout) [@matthewvenn](https://chaos.social/@matthewvenn)
-  - X (formerly Twitter) [#tinytapeout](https://twitter.com/hashtag/tinytapeout) [@tinytapeout](https://twitter.com/tinytapeout)
-  - Bluesky [@tinytapeout.com](https://bsky.app/profile/tinytapeout.com)
+This reduces hardware complexity and power consumption compared to conventional digital computation.
+
+## Simulation and Verification
+
+The design was verified using RTL simulation.
+
+Test cases include:
+- Low alpha → AF selected
+- Mid alpha → DF selected
+- High alpha → CF selected
+
+Waveforms confirm correct relay selection behavior.
+
+## Future Improvements
+
+- Incorporate SNR as additional input
+- Replace fixed weights with LUT derived from BER dataset
+- Add adaptive threshold scaling
