@@ -1,38 +1,55 @@
-# SPDX-FileCopyrightText: © 2024 Tiny Tapeout
-# SPDX-License-Identifier: Apache-2.0
-
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles
+from cocotb.triggers import RisingEdge
+
+
+async def wait_cycles(clk, n):
+    for _ in range(n):
+        await RisingEdge(clk)
+
+
+async def read_clean_sel(dut, max_cycles=4000):
+    # Read full uo_out, then mask [1:0] (Icarus slice not supported)
+    for _ in range(max_cycles):
+        bs = dut.uo_out.value.binstr  # should be 8 bits
+        if len(bs) == 8 and all(c in "01" for c in bs):
+            full = int(bs, 2)
+            return full & 0b11
+        await RisingEdge(dut.clk)
+    raise AssertionError(f"uo_out stayed X/Z: {dut.uo_out.value.binstr}")
+
 
 @cocotb.test()
 async def test_relay_selector(dut):
-    clk   = dut.clk
-    rst_n = dut.rst_n
-    ui_in = dut.ui_in
-    uo_out = dut.uo_out
+    cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
 
-    # optional signals (safe even if unused in design)
+    # Drive inputs
     dut.ena.value = 1
     dut.uio_in.value = 0
+    dut.ui_in.value = 0
 
-    cocotb.start_soon(Clock(clk, 10, units="ns").start())
+    # Reset
+    dut.rst_n.value = 0
+    await wait_cycles(dut.clk, 5)
+    dut.rst_n.value = 1
+    await wait_cycles(dut.clk, 5)
 
-    # reset
-    rst_n.value = 0
-    ui_in.value = 0
-    await ClockCycles(clk, 5)
-    rst_n.value = 1
-    await ClockCycles(clk, 2)
+    cocotb.log.info("Starting LIF relay selector sim...")
 
     tests = [
-        (20,  None),
-        (120, None),
-        (220, None),
+        (20,  0b00),
+        (120, 0b10),
+        (220, 0b01),
     ]
 
-    for a, _ in tests:
-        ui_in.value = a
-        await ClockCycles(clk, 200)
-        got = int(uo_out.value) & 0b11
+    for a, expected in tests:
+        dut.ui_in.value = a
+        await wait_cycles(dut.clk, 1200)  # plenty of time to integrate/spike
+
+        got = await read_clean_sel(dut)
         dut._log.info(f"alpha(ui_in)={a} -> relay_sel={got:02b}")
+
+        assert got == expected, f"alpha={a} got={got:02b} expected={expected:02b}"
+
+    assert int(dut.uio_out.value) == 0
+    assert int(dut.uio_oe.value) == 0
