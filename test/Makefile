@@ -42,5 +42,5 @@ TOPLEVEL = tb
 COCOTB_TEST_MODULES = test
 MODULE ?= ${COCOTB_TEST_MODULES}
 # include cocotb's make rules to take care of the simulator setup
-export COCOTB_RESULTS_FILE = test/results.xml
+export COCOTB_RESULTS_FILE = results.xml
 include $(shell cocotb-config --makefiles)/Makefile.sim
