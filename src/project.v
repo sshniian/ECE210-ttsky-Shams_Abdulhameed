@@ -6,11 +6,11 @@
 `default_nettype none
 
 module tt_um_example(
-    input  wire [7:0] ui_in,    // use as alpha
+    input  wire [7:0] ui_in,
     input  wire [7:0] uio_in,
     output wire [7:0] uio_out,
     output wire [7:0] uio_oe,
-    output wire [7:0] uo_out,    // uo_out[1:0] = relay_sel
+    output wire [7:0] uo_out,
     input  wire       ena,
     input  wire       clk,
     input  wire       rst_n
@@ -20,13 +20,11 @@ module tt_um_example(
 `endif
 );
 
-    // Unused bidirectional IOs
     assign uio_out = 8'b0;
     assign uio_oe  = 8'b0;
 
     wire [1:0] relay_sel;
 
-    // Do NOT gate reset with ena (avoids X at time 0 in gate-level sim)
     lif_relay u_lif (
         .clk       (clk),
         .rst_n     (rst_n),
@@ -34,10 +32,8 @@ module tt_um_example(
         .relay_sel (relay_sel)
     );
 
-    // Drive only the used bits cleanly
     assign uo_out = { 6'b0, relay_sel };
 
-    // Avoid X-propagation from unused signals
     wire _unused = 1'b0;
 
 endmodule

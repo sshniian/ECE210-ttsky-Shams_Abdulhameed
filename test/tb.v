@@ -1,21 +1,19 @@
 `timescale 1ns/1ps
 `default_nettype none
 
-module tb();
+module tb;
+
   reg  clk;
   reg  rst_n;
   reg  ena;
   reg  [7:0] ui_in;
   reg  [7:0] uio_in;
+
   wire [7:0] uo_out;
   wire [7:0] uio_out;
   wire [7:0] uio_oe;
 
-`ifdef USE_POWER_PINS
-  supply1 vccd1;
-  supply0 vssd1;
-`endif
-
+  // Instantiate DUT (TinyTapeout top module)
   tt_um_example dut (
     .ui_in(ui_in),
     .uio_in(uio_in),
@@ -25,13 +23,11 @@ module tb();
     .ena(ena),
     .clk(clk),
     .rst_n(rst_n)
-`ifdef USE_POWER_PINS
-    , .vccd1(vccd1)
-    , .vssd1(vssd1)
-`endif
   );
 
-  // No clock generator here: cocotb provides the clock in gl_test.
+  // IMPORTANT: Do NOT generate a clock here.
+  // Cocotb drives clk during simulation.
+
   initial begin
     clk    = 1'b0;
     ena    = 1'b1;
