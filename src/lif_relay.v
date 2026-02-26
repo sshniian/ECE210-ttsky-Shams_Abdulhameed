@@ -112,7 +112,7 @@ module lif_relay (
     // =====================================================
     // SEQUENTIAL BLOCK (Flip-Flops triggered by CLOCK)
     // =====================================================
-    always @(posedge clk or negedge rst_n) begin
+    always @(posedge clk) begin
         if (!rst_n) begin
             V_AF      <= 16'd0;
             V_DF      <= 16'd0;
