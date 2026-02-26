@@ -1,7 +1,7 @@
 # Tiny Tapeout project information
 project:
   title:        "Sequential Leaky Winner-Take-All Relay Selector"      # Project title
-  author:       "Shams Abdulhameed      # Your name
+  author:       "Shams Abdulhameed " # your name
   discord:      "shamsshniian"      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
   description:  "Brain-inspired relay selection circuit using leaky integrate-and-fire decision logic"      # One line description of what your project does
   language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
@@ -20,8 +20,8 @@ project:
     - "project.v"
     - "lif_relay.v"
 
-# The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
-# This section is for the datasheet/website. Use descriptive names (e.g., RX, TX, MOSI, SCL, SEG_A, etc.).
+  # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
+  # This section is for the datasheet/website. Use descriptive names (e.g., RX, TX, MOSI, SCL, SEG_A, etc.).
 pinout:
   # Inputs
   
