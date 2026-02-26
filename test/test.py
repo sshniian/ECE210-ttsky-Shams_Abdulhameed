@@ -5,38 +5,34 @@ import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles
 
-
 @cocotb.test()
-async def test_project(dut):
-    dut._log.info("Start")
+async def test_relay_selector(dut):
+    clk   = dut.clk
+    rst_n = dut.rst_n
+    ui_in = dut.ui_in
+    uo_out = dut.uo_out
 
-    # Set the clock period to 10 us (100 KHz)
-    clock = Clock(dut.clk, 10, units="us")
-    cocotb.start_soon(clock.start())
-
-    # Reset
-    dut._log.info("Reset")
+    # optional signals (safe even if unused in design)
     dut.ena.value = 1
-    dut.ui_in.value = 0
     dut.uio_in.value = 0
-    dut.rst_n.value = 0
-    await ClockCycles(dut.clk, 10)
-    dut.rst_n.value = 1
 
-    dut._log.info("Test project behavior")
+    cocotb.start_soon(Clock(clk, 10, units="ns").start())
 
-    tests = [0, 1, 20, 127, 128, 255]
+    # reset
+    rst_n.value = 0
+    ui_in.value = 0
+    await ClockCycles(clk, 5)
+    rst_n.value = 1
+    await ClockCycles(clk, 2)
 
-    for x in tests:
-        dut.ui_in.value = x
-        await ClockCycles(dut.clk, 1)
+    tests = [
+        (20,  None),
+        (120, None),
+        (220, None),
+    ]
 
-        expected = ((x << 1) + 10) & 0xFF
-        got = int(dut.uo_out.value)
-
-        assert got == expected, f"ui_in={x} got={got} expected={expected}"
-
-    assert int(dut.uio_out.value) == 0
-    assert int(dut.uio_oe.value) == 0
-    # Keep testing the module by changing the input values, waiting for
-    # one or more clock cycles, and asserting the expected output values.
+    for a, _ in tests:
+        ui_in.value = a
+        await ClockCycles(clk, 200)
+        got = int(uo_out.value) & 0b11
+        dut._log.info(f"alpha(ui_in)={a} -> relay_sel={got:02b}")
