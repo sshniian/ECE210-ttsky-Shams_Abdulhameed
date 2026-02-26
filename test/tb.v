@@ -2,7 +2,7 @@
 `default_nettype none
 
 module tb();
-   reg  clk;
+  reg  clk;
   reg  rst_n;
   reg  ena;
   reg  [7:0] ui_in;
@@ -31,11 +31,16 @@ module tb();
 `endif
   );
 
-  initial clk=0;
-  always #5 clk = ~clk;
-
+  // No clock generator here: cocotb provides the clock in gl_test.
   initial begin
-    ena=1'b1;
-    uio_in=8'd0;
+    clk    = 1'b0;
+    ena    = 1'b1;
+    ui_in  = 8'd0;
+    uio_in = 8'd0;
+
+    rst_n  = 1'b0;
+    #100;
+    rst_n  = 1'b1;
   end
+
 endmodule
