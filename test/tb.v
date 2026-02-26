@@ -1,8 +1,8 @@
 `timescale 1ns/1ps
 `default_nettype none
 
-module tb;
-  reg  clk;
+module tb();
+   reg  clk;
   reg  rst_n;
   reg  ena;
   reg  [7:0] ui_in;
@@ -10,6 +10,11 @@ module tb;
   wire [7:0] uo_out;
   wire [7:0] uio_out;
   wire [7:0] uio_oe;
+
+`ifdef USE_POWER_PINS
+  supply1 vccd1;
+  supply0 vssd1;
+`endif
 
   tt_um_example dut (
     .ui_in(ui_in),
@@ -20,6 +25,10 @@ module tb;
     .ena(ena),
     .clk(clk),
     .rst_n(rst_n)
+`ifdef USE_POWER_PINS
+    , .vccd1(vccd1)
+    , .vssd1(vssd1)
+`endif
   );
 
   initial clk=0;
