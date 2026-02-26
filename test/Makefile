@@ -43,3 +43,7 @@ COCOTB_TEST_MODULES = test
 MODULE ?= ${COCOTB_TEST_MODULES}
 # include cocotb's make rules to take care of the simulator setup
 include $(shell cocotb-config --makefiles)/Makefile.sim
+RESULT_FILE = results.xml
+
+test: sim
+	pytest -q --junitxml=$(RESULT_FILE)
