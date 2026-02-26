@@ -26,11 +26,11 @@ module tt_um_example(
     wire [1:0] relay_sel;
 
     lif_relay u_lif (
-        .clk       (clk),
-        .rst_n     (rst_n),
-        .alpha     (ui_in),
-        .relay_sel (relay_sel)
-    );
+    .clk       (clk),
+    .rst_n     (rst_n & ena),
+    .alpha     (ui_in),
+    .relay_sel (relay_sel)
+);
 
     assign uo_out = { 6'b0, relay_sel };
 
