@@ -12,9 +12,12 @@ module tb();
   wire [7:0] uio_out;
   wire [7:0] uio_oe;
 
+  // Gate-level standard-cell power rails (needed when USE_POWER_PINS is enabled)
 `ifdef USE_POWER_PINS
-  supply1 vccd1;
-  supply0 vssd1;
+  supply1 VPWR;
+  supply0 VGND;
+  supply1 VPB;
+  supply0 VNB;
 `endif
 
   tt_um_example dut (
@@ -26,10 +29,6 @@ module tb();
     .ena(ena),
     .clk(clk),
     .rst_n(rst_n)
-`ifdef USE_POWER_PINS
-    , .vccd1(vccd1)
-    , .vssd1(vssd1)
-`endif
   );
 
   // Optional: waveform dump (SAFE with cocotb)
