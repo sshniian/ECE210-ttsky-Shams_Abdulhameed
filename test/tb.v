@@ -1,7 +1,8 @@
 `timescale 1ns/1ps
 `default_nettype none
 
-module tb;
+module tb();
+
   reg  clk;
   reg  rst_n;
   reg  ena;
@@ -31,6 +32,13 @@ module tb;
 `endif
   );
 
-  // cocotb drives everything
+  // Optional: waveform dump (SAFE with cocotb)
+  initial begin
+    $dumpfile("waves.vcd");
+    $dumpvars(0, tb);
+  end
+
+  // IMPORTANT: no clock/reset/input driving here.
+  // cocotb will drive clk, rst_n, ena, ui_in, uio_in.
 
 endmodule

@@ -17,39 +17,67 @@ async def wait_uo_known(dut, max_cycles=20000):
     raise AssertionError(f"uo_out stayed X/Z: {dut.uo_out.value.binstr}")
 
 
+def decode_sel(sel):
+    if sel == 0b00:
+        return "AF"
+    elif sel == 0b01:
+        return "DF"
+    elif sel == 0b10:
+        return "CF"
+    else:
+        return "INVALID"
+
+
 @cocotb.test()
 async def test_relay_selector(dut):
-    # Drive stable values
+
+    dut._log.info("Starting Relay Selector Test")
+
+    # Drive stable defaults
     dut.ena.value = 1
     dut.uio_in.value = 0
     dut.ui_in.value = 0
     dut.clk.value = 0
-
-    # IMPORTANT: start reset high first (so we can create a real negedge)
     dut.rst_n.value = 1
 
     # Start clock
     cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
     await wait_cycles(dut.clk, 10)
 
-    # Real async reset pulse: 1 -> 0 -> 1
+    # Proper async reset pulse
+    dut._log.info("Applying reset pulse...")
     dut.rst_n.value = 0
     await wait_cycles(dut.clk, 50)
     dut.rst_n.value = 1
     await wait_cycles(dut.clk, 50)
 
-    # Now output should become known (not X)
+    # Confirm output becomes valid
     full = await wait_uo_known(dut)
     sel = full & 0b11
-    assert sel in (0b00, 0b01, 0b10), f"relay_sel invalid: {sel:02b}"
 
-    # Optional: try a few alphas (still only require known output)
+    dut._log.info(f"After reset -> relay_sel={sel:02b} ({decode_sel(sel)})")
+
+    assert sel in (0b00, 0b01, 0b10), f"Invalid relay_sel after reset: {sel:02b}"
+
+    # Test multiple alpha values
     for a in (20, 120, 220):
         dut.ui_in.value = a
-        await wait_cycles(dut.clk, 8000)
+        dut._log.info(f"Testing alpha = {a}")
+
+        await wait_cycles(dut.clk, 20000)
+
         full = await wait_uo_known(dut)
         sel = full & 0b11
-        assert sel in (0b00, 0b01, 0b10), f"alpha={a} relay_sel invalid: {sel:02b}"
 
+        dut._log.info(
+            f"alpha={a:3d} -> relay_sel={sel:02b} ({decode_sel(sel)})"
+        )
+
+        assert sel in (0b00, 0b01, 0b10), \
+            f"alpha={a} relay_sel invalid: {sel:02b}"
+
+    # Final structural checks
     assert int(dut.uio_out.value) == 0
     assert int(dut.uio_oe.value) == 0
+
+    dut._log.info("Relay Selector Test Completed Successfully")
