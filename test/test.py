@@ -7,10 +7,8 @@ async def wait_cycles(clk, n):
     for _ in range(n):
         await RisingEdge(clk)
 
-
 def bits_known_01(bitstr: str) -> bool:
     return bitstr is not None and all(c in "01" for c in bitstr)
-
 
 async def wait_uo_known(dut, max_cycles=200000):
     """Wait until uo_out becomes fully known (8 bits of only 0/1)."""
@@ -29,7 +27,6 @@ def decode_sel(sel):
         0b10: "CF",
     }
     return mapping.get(sel, "INVALID")
-
 @cocotb.test()
 async def test_relay_selector(dut):
     dut._log.info("Starting Relay Selector Test")
