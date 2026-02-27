@@ -13,12 +13,9 @@ def bits_known_01(bitstr: str) -> bool:
 
 
 async def wait_uo_known(dut, max_cycles=200000):
-    """
-    Wait until uo_out becomes fully known (8 bits of only 0/1).
-    In gate-level sim, signals can stay X/Z for a while after reset.
-    """
+    """Wait until uo_out becomes fully known (8 bits of only 0/1)."""
     for _ in range(max_cycles):
-        bs = str(dut.uo_out.value)  # replaces deprecated .binstr
+        bs = str(dut.uo_out.value)  # avoids deprecated .binstr
         if len(bs) == 8 and bits_known_01(bs):
             return int(bs, 2)
         await RisingEdge(dut.clk)
@@ -29,12 +26,11 @@ async def wait_uo_known(dut, max_cycles=200000):
 def decode_sel(sel):
     if sel == 0b00:
         return "AF"
-    elif sel == 0b01:
+    if sel == 0b01:
         return "DF"
-    elif sel == 0b10:
+    if sel == 0b10:
         return "CF"
-    else:
-        return "INVALID"
+    return "INVALID"
 
 
 @cocotb.test()
@@ -52,8 +48,9 @@ async def test_relay_selector(dut):
 
     # ----------------------------
     # Start clock
+    # Keep 'units' since your CI passes with it
     # ----------------------------
-    cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())  # unit (not units)
+    cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
     await wait_cycles(dut.clk, 10)
 
     # ----------------------------
@@ -72,7 +69,9 @@ async def test_relay_selector(dut):
     sel = full & 0b11
 
     dut._log.info(f"After reset -> relay_sel={sel:02b} ({decode_sel(sel)})")
-    assert sel in (0b00, 0b01, 0b10), f"Invalid relay_sel after reset: {sel:02b}"
+    assert sel in (0b00, 0b01, 0b10), (
+        f"Invalid relay_sel after reset: {sel:02b}"
+    )
 
     # ----------------------------
     # Test alpha values
@@ -81,15 +80,16 @@ async def test_relay_selector(dut):
         dut.ui_in.value = a
         dut._log.info(f"Testing alpha = {a}")
 
-        # give the design time to update (gate-level can be slow)
+        # Give the design time to update (gate-level can be slow)
         await wait_cycles(dut.clk, 20000)
 
         full = await wait_uo_known(dut)
         sel = full & 0b11
 
         dut._log.info(f"alpha={a:3d} -> relay_sel={sel:02b} ({decode_sel(sel)})")
-        assert sel in (0b00, 0b01, 0b10), f"alpha={a} relay_sel invalid: {sel:02b}"
-
+        assert sel in (0b00, 0b01, 0b10), (
+            f"alpha={a} relay_sel invalid: {sel:02b}"
+        )
     # ----------------------------
     # Structural checks
     # ----------------------------
