@@ -22,15 +22,13 @@ async def wait_uo_known(dut, max_cycles=200000):
 
     raise AssertionError(f"uo_out stayed X/Z: {str(dut.uo_out.value)}")
 
-
 def decode_sel(sel):
-    if sel == 0b00:
-        return "AF"
-    if sel == 0b01:
-        return "DF"
-    if sel == 0b10:
-        return "CF"
-    return "INVALID"
+    mapping = {
+        0b00: "AF",
+        0b01: "DF",
+        0b10: "CF",
+    }
+    return mapping.get(sel, "INVALID")
 
 
 @cocotb.test()
@@ -46,10 +44,6 @@ async def test_relay_selector(dut):
     dut.clk.value = 0
     dut.rst_n.value = 1
 
-    # ----------------------------
-    # Start clock
-    # Keep 'units' since your CI passes with it
-    # ----------------------------
     cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
     await wait_cycles(dut.clk, 10)
 
