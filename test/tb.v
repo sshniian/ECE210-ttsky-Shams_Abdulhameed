@@ -31,7 +31,8 @@ module tb;
 `endif
   );
 
-  // NO initial block, NO clock generator.
+  // IMPORTANT:
+  // No initial block. No clock generator.
   // cocotb drives everything.
 
 endmodule
