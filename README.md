@@ -296,10 +296,10 @@ Dynamic LIF competition + Winner-Take-All arbitration.
 The synthesized RTL structure of the design is shown below. 
 The top-level module `tt_um_example` instantiates the neuromorphic relay selector core `lif_relay`, which generates the 2-bit `relay_sel` output.
 
-[View RTL Schematic (PDF)](docs/lif_rtl_schematic.pdf)
+[View RTL Schematic (PDF)](lif_rtl_schematic.pdf)
 
 ## Gate-Level Schematic
-[View Gate Schematic (PDF)](docs/lif_gate_schematic.pdf)
+[View Gate Schematic (PDF)](lif_gate_schematic.pdf)
 ## Future Improvements
 Future Work
 In this prototype, the input α is a simplified synthetic metric used to demonstrate hardware feasibility. The current design does not incorporate real channel state information (CSI), BER measurements, or adaptive learning.
