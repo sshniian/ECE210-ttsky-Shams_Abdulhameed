@@ -8,10 +8,10 @@ async def wait_cycles(clk, n):
         await RisingEdge(clk)
 
 
-async def read_clean_sel(dut, max_cycles=4000):
-    # Read full uo_out, then mask [1:0] (Icarus slice not supported)
+async def read_clean_sel(dut, max_cycles=8000):
+    # Read full uo_out, then mask [1:0]
     for _ in range(max_cycles):
-        bs = dut.uo_out.value.binstr  # should be 8 bits
+        bs = dut.uo_out.value.binstr  # expect 8 bits
         if len(bs) == 8 and all(c in "01" for c in bs):
             full = int(bs, 2)
             return full & 0b11
@@ -21,30 +21,32 @@ async def read_clean_sel(dut, max_cycles=4000):
 
 @cocotb.test()
 async def test_relay_selector(dut):
-    cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
-
-    # Drive inputs
+    # Drive stable values BEFORE starting the clock (reduces early-X in gate-level)
     dut.ena.value = 1
     dut.uio_in.value = 0
     dut.ui_in.value = 0
-
-    # Reset (LONGER for gate-level)
     dut.rst_n.value = 0
-    await wait_cycles(dut.clk, 20)
+    dut.clk.value = 0
+
+    # Start clock
+    cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
+
+    # Hold reset longer for gate-level
+    await wait_cycles(dut.clk, 50)
     dut.rst_n.value = 1
-    await wait_cycles(dut.clk, 20)
+    await wait_cycles(dut.clk, 50)
 
     cocotb.log.info("Starting LIF relay selector sim...")
 
     tests = [
-        (20,  0b00),
-        (120, 0b10),
-        (220, 0b01),
+        (20,  0b00),  # AF
+        (120, 0b10),  # CF
+        (220, 0b01),  # DF
     ]
 
     for a, expected in tests:
         dut.ui_in.value = a
-        await wait_cycles(dut.clk, 1200)  # plenty of time to integrate/spike
+        await wait_cycles(dut.clk, 2000)  # more time for gate-level delays
 
         got = await read_clean_sel(dut)
         dut._log.info(f"alpha(ui_in)={a} -> relay_sel={got:02b}")
