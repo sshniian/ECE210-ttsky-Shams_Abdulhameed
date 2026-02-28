@@ -12,12 +12,9 @@ module tb();
   wire [7:0] uio_out;
   wire [7:0] uio_oe;
 
-  // Gate-level standard-cell power rails (needed when USE_POWER_PINS is enabled)
 `ifdef USE_POWER_PINS
-  supply1 VPWR;
-  supply0 VGND;
-  supply1 VPB;
-  supply0 VNB;
+  wire vccd1 = 1'b1;
+  wire vssd1 = 1'b0;
 `endif
 
   tt_um_example dut (
@@ -29,15 +26,15 @@ module tb();
     .ena(ena),
     .clk(clk),
     .rst_n(rst_n)
+`ifdef USE_POWER_PINS
+    ,.vccd1(vccd1)
+    ,.vssd1(vssd1)
+`endif
   );
 
-  // Optional: waveform dump (SAFE with cocotb)
   initial begin
     $dumpfile("waves.vcd");
     $dumpvars(0, tb);
   end
-
-  // IMPORTANT: no clock/reset/input driving here.
-  // cocotb will drive clk, rst_n, ena, ui_in, uio_in.
 
 endmodule
