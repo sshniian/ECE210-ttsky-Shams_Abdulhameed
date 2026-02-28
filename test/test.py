@@ -43,7 +43,6 @@ async def test_relay_selector(dut):
     dut.rst_n.value = 1
     await wait_cycles(dut.clk, 50)
 
-   
     full = await wait_uo_known(dut)
     sel = full & 0b11
 
