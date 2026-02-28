@@ -26,10 +26,6 @@ module tb();
     .ena(ena),
     .clk(clk),
     .rst_n(rst_n)
-`ifdef USE_POWER_PINS
-    ,.vccd1(vccd1)
-    ,.vssd1(vssd1)
-`endif
   );
 
   initial begin
