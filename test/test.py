@@ -6,7 +6,6 @@ from cocotb.triggers import RisingEdge
 async def wait_cycles(clk, n):
     for _ in range(n):
         await RisingEdge(clk)
-
 def bits_known_01(bitstr: str) -> bool:
     return bitstr is not None and all(c in "01" for c in bitstr)
 
@@ -17,7 +16,6 @@ async def wait_uo_known(dut, max_cycles=200000):
         if len(bs) == 8 and bits_known_01(bs):
             return int(bs, 2)
         await RisingEdge(dut.clk)
-
     raise AssertionError(f"uo_out stayed X/Z: {str(dut.uo_out.value)}")
 
 def decode_sel(sel):
@@ -30,7 +28,6 @@ def decode_sel(sel):
 @cocotb.test()
 async def test_relay_selector(dut):
     dut._log.info("Starting Relay Selector Test")
-    
     dut.ena.value = 1
     dut.uio_in.value = 0
     dut.ui_in.value = 0
