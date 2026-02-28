@@ -83,7 +83,7 @@ module lif_relay (
             wta_sel = 2'b00;  // AF
     end
 
-    always @(posedge clk) begin
+    always @(posedge clk or negedge rst_n) begins
         if (!rst_n) begin
             V_AF      <= 16'd0;
             V_DF      <= 16'd0;
